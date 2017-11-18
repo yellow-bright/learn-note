@@ -1,0 +1,175 @@
+linux命令：
+git config --list =>查看信息
+git config --global user.name "你的名字" =>只有配置名字
+git config --global user.email "邮箱" =>和邮箱才能提交git
+
+git init =>初始化文件
+	-一个项目初始化一次，不能嵌套
+	-git init 告诉git哪个文件夹被git所管理
+
+rm -rf 文件夹名 =>删除文件夹
+rm 文件名 =>删除文件
+mkdir 文件夹名 =>创建文件夹(目录)
+cd 文件夹名 =>进入文件夹
+cd 盘名: =>进入指定盘 如进入d盘 cd d:
+也可以直接把某个文件夹拖入git中，就可以自动得到路径，写法：敲cd然后再拖入
+ls =>查看文件（不能查看隐藏文件）
+ls -al =>显示目录下所有的文件
+touch 文件名 =>创建文件（都是空文件）
+cat 文件名 =>查看文件
+
+vi 文件名 =>文件编辑
+	-1.进入后可用"i"键或者Insert去切换输入内容
+	-2.输入完成后，按esc键结束编辑
+	-3.按shift+: 输入 wq 退出并保存 ，输入q!强制退出(不保存)
+
+git status =>查看状态(红的代表工作区，绿色代表暂存区，无色代表历史区)
+
+git add .或者-A或者文件名 =>提交到暂存区：会在git文件夹中的生成一个index的文件
+
+git rm --cached . -r =>删除暂存区,(再看git status,会发现变红了，所以还是在工作区)
+
+git commit -m "消息" =>提交到版本库(正式提交)
+
+git log =>查看提交日志（有版本号，提交信息，提交者和邮箱等）
+
+git diff =>工作区和暂存区比较
+git diff 分枝名 =>工作区和版本库比
+git diff --cached =>暂存区和版本库比
+
+###撤销：
+git checkout 文件名 =>从指定文件从暂存区将工作区内容覆盖掉
+git checkout . =>将分枝下所有文件从暂存区替换到工作区
+
+git reset HEAD 文件名 =>将暂存区回滚到上一次存储,相当于删除当前的暂存区。
+
+history >要生成文件名 =>生成操作记录文件
+
+git commit -a -m "提交备注" =>直接从工作区提交到版本库(前提是文件需要提交到版本库一次)
+
+git reflog =>打出所有版本，可以找出版本回滚记录
+
+git reset --hard 要回滚的版本号 =>回到历史中选中的版本，此时暂存区和工作区都和回滚过来的版本就都保持一致了
+
+git reset --hard HEAD^ =>快速回滚到上一个版本
+
+git branch =>查看分枝
+
+git branch 分枝名 =>创建分枝
+
+git checkout 分枝名 =>切换分枝
+
+git checkout -b 分枝名 =>创建并切换成创建的分枝
+(新创建完成的分枝和原来的分枝在未提交到版本库前是一样的，谁只要提交了，就和其他分枝不一样了)
+
+git branch -D 分枝名 =>删除指定分枝，删除分枝时，当前用户不能在当前要删的分枝上
+
+git stash =>暂存，分枝有更改，不能直接切换，需要暂存使用过渡区覆盖掉工作区
+
+git stach pop =>还原暂存的内容
+
+git merge 分枝名 =>合并哪个分支
+(步骤：先创建主干，在主干的基础上添加一个分枝，在分枝上进行提交，切换到主干合并分支)
+
+echo 写入内容 > 文件
+	echo hello > 1.txt =>将hello写入 1.txt文件
+echo 写入内容 >> 文件
+	echo hello >> 1.txt =>将hello追加到1.txt中
+	如果没有1.txt这个文件，就是创建文件并写入
+
+mv 文件 位置 =>把文件移动到指定位置	
+
+-------------------------------------------------------------------------
+分枝合并完整步骤：
+我们目的是要以master作为主分枝，把其他分枝合到主分枝上的。
+1.先用git config --list查看信息，如果没有username和useremail就设置用户名和邮箱
+  git config --global user.name "" /  git config --blobal user.email ""	
+2.初始化 git init, 得到git默认文件夹
+3.创建一个文件并写入内容 echo 内容 >> 文件 （如创建了1.txt）
+4.现在是没有任何分枝的，要想有分枝，我们需要把1.txt 提交到版本库
+  1）先要提交到暂存区 git add 1.txt
+  2) 再提交到版本库 git commit -m "备注" 
+5.查看分枝 git branch =>就得到了master的分枝
+6.创建分枝 git branch hl (如分枝名叫hl)，此时master和hl属于“共享”关系
+7.切换到hl分枝 git checkout hl
+8.在hl分枝中的1.txt写入内容，如"haha"
+9.此时，如果切换分枝到master，那么master中的1.txt的内容和hl的1.txt内容保持一致，因
+  为他们现在属于"共享模式"，并且现写入的"haha"都在工作区 
+10.要想hl不再与master共享，那么只需要把hl提交到版本库即可,因为1.txt在master的时候
+   已经提交过一次版本库了，现在又是出于"共享模式"，所以在hl的1.txt也是属于提交过一
+   次的了，所以直接可以从工作区提交到版本库 git commit -a -m "备注"
+11.此时hl与master分枝就不再"共享了"，都是独立的了。
+12.此时再切换到master查看 1.txt内容: cat 1.txt,发现并没有"共享"时候的"haha"，
+   因为当时共享还是在工作区，现在切回到master,我们看到的1.txt文件是我们的工作区，
+   hl和master都是相当于一个工作区，内容怎么变无所谓，但是hl的1.txt加入的"hah"已
+   经提交到了版本库，但是master没有提交到版本库，只是工作区变了，那么再切回来（工作区），肯定就没有了。
+13.此时，hl与master算是独立的两个分支了，没有任何交集了。
+14.但是在hl中如果再次写入内容或者添加一些文件的操作时，是不能直接切换到master分枝
+	的(除非再提交到版本库才行)会报错，需要先缓存: git stash 后再切换，看完master
+	后再从master切换到hl，这时候我们发现，原来添加的内容或者添加的文件没了，要想恢
+	复：git stash pop 即可恢复过去，此时我们查看状态: git status ,发现还在工作
+	区（因为正在编辑），要想再切换，还要git stash暂存，或者直接提交即可
+15.如果hl要合并与master,需要切换到master分枝下：git merge hl 
+   这样，master就长得很hl一模一样了，就再次进入工作区共享	 
+
+
+★sourcetree =>> git的管理工具
+
+git log --graph =>查看合并图谱
+git log --graph --oneline =>精简查看合并图谱
+
+-------------------------------------------------------------------------------
+本地传到gitHub:
+-先有gitHub账号
+##本地提交
+-README.md
+-创建一个 .gitignore文件
+ 进入git官网=>Documentation=>Reference=>gitignore(查看gitignore说明)
+ gitignore中写的都是在上传gitHub时要忽略的文件	
+
+-git 不会上传空文件夹，一般在空文件里创建一个文件，目的就是保持这个文件夹能够保持队列，上传进去
+
+##关联远程仓库
+git remote add origin https://github.com/yellow-bright/node-project.git
+origin=>是后面地址的别名
+
+git remote -v =>查看信息有没有成功呀
+
+如果关联时候写错了，他还是会提交上去，需要把其删除：
+ git remote rm 别名 =>删除关联 别名就是origin(可以自己起)
+
+##推到仓库里
+git push origin master ,输入完成后，会让我们输入gitHub的账号和密码，然后就会成功上传了
+git pull origin master =>把github的代码拉到本地
+
+如果修改上传的，就直接在本地上git add . / git commit -m ''，也就是提交一次，就会,然后再：
+git push origin master =>会出现一个需要提示（蓝色的~），意思是我们从gitHub上下载下来到我们
+本地的git是需要合并的，但是没有(merge),直接 shift: => wq 结束，然后再git push origin master
+到gitHub上即可完成更新。 
+
+
+## gh-pages 创建分枝来发布我们的静态页
+-在项目中 创建一个gh-pages的分枝
+-将分枝提到线上仓库里
+-找到提供给给你的网站
+
+具体步骤：
+1.创建分枝 git checkout -b gh-pages
+2.创建html页面
+3.git add . /git commit -m ''
+4.git push origin gh-pages =>上传到gitHub
+5.进入gitHub=>setting=>opition=>GitHub Pages,即可看到在gitHub上的网址，就可以预览页面了。
+6.可以吧网址在首页上的Edit中写入
+
+##Issues 问题
+-可以提交对项目，自己的信息
+
+##更改别人代码
+-fork是在当前项目下克隆了一份，如果代码更新，不会随之更新
+
+##拉取本地
+git clone 项目地址 项目别名 =>拉取本地
+
+->默认就是git仓库而且有origin 地址，可以将代码提交到自己的gitHub
+->只有fork关系才能发送 pull request请求
+
